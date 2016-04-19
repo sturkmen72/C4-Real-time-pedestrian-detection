@@ -1074,7 +1074,8 @@ int main(int argc,char* argv[])
     LoadCascade(scanner);
     std::cout<<"Detectors loaded."<<std::endl;
     int key = 0;
-    bool dbg = argc < 3;
+    bool rect_organization = true;
+
     while( key != 27 )
     {
         capture >> src;
@@ -1086,7 +1087,7 @@ int main(int argc,char* argv[])
         std::vector<CRect> results;
         scanner.FastScan(original, results, 2);
 
-        if( dbg )
+        if(rect_organization)
         {
             PostProcess(results,2);
             PostProcess(results,0);
@@ -1096,11 +1097,13 @@ int main(int argc,char* argv[])
         for(size_t i = 0; i < results.size(); i++)
         {
             cv::rectangle(src, cvPoint(results[i].left,results[i].top),cvPoint(results[i].right,results[i].bottom),cv::Scalar(0,255,0),2 );
-            cv::rectangle(src, cvPoint(results[i].left,results[i].top),cvPoint(results[i].right,results[i].bottom),cv::Scalar(0,0,255),1 );
         }
 
         cv::imshow("result",src);
         key = cv::waitKey(1);
+
+		if (key == 32)
+			rect_organization = !rect_organization;
     }
     cv::waitKey();
     return 0;
