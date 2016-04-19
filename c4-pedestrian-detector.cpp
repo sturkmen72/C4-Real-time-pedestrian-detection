@@ -1078,6 +1078,9 @@ int main(int argc,char* argv[])
 	std::cout << "space : toggle using simple post-process (NMS, non-maximal suppression)" << std::endl;
 	std::cout << "0     : waits to process next frame until a key pressed" << std::endl;
 	std::cout << "1     : doesn't wait to process next frame" << std::endl;
+	std::cout << "2     : resize frames 1/2" << std::endl;
+	std::cout << "3     : don't resize frames" << std::endl;
+	std::cout << "4     : resize frames 1/4" << std::endl;
 	if (argc < 2)
 		return 0;
 
@@ -1088,15 +1091,20 @@ int main(int argc,char* argv[])
     std::cout<<"Detectors loaded."<<std::endl;
     int key = 0;
 	int wait_time = 1;
+	float fx = 1;
     bool rect_organization = true;
+	IntImage<double> original;
 
     while( key != 27 )
     {
         capture >> src;
-        if( src.empty() ) break;
-
-        IntImage<double> original;
-
+        if( src.empty() ) break;  
+		
+		if (fx < 1)
+		{
+			cv::resize(src, src, cv::Size(), fx, fx);
+		}
+		
         original.Load( src );
         std::vector<CRect> results;
         scanner.FastScan(original, results, 2);
@@ -1124,7 +1132,16 @@ int main(int argc,char* argv[])
 
 		if (key == 49)
 			wait_time = 1;
-    }
+
+		if (key == 50)
+			fx = 0.5;
+
+		if (key == 51)
+			fx = 1;
+
+		if (key == 52)
+			fx = 0.25;
+	}
     cv::waitKey();
     return 0;
 }
