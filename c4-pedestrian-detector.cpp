@@ -688,7 +688,11 @@ double UseSVM_CD_FastEvaluationStructure(const char* modelfile, const int m, con
 {
 
     std::ifstream fs(modelfile, std::fstream::binary);
-
+	if( !fs.is_open() )
+	{
+		std::cout << "SVM model " << modelfile << " can not be loaded." << std::endl;
+		exit(-1);
+	}
     // Header
     int rows, cols, type, channels;
     fs.read((char*)&rows, sizeof(int));         // rows
@@ -1068,12 +1072,22 @@ int DetectHuman(const char* filename,DetectionScanner& ds)
 
 int main(int argc,char* argv[])
 {
-    cv::Mat src;
+	std::cout << "usage:" << std::endl;
+	std::cout << argv[0] << " <video_file>" << std::endl << std::endl;
+	std::cout << "keys:" << std::endl;
+	std::cout << "space : toggle using simple post-process (NMS, non-maximal suppression)" << std::endl;
+	std::cout << "0     : waits to process next frame until a key pressed" << std::endl;
+	std::cout << "1     : doesn't wait to process next frame" << std::endl;
+	if (argc < 2)
+		return 0;
+
+	cv::Mat src;
     cv::VideoCapture capture( argv[1] );
 
     LoadCascade(scanner);
     std::cout<<"Detectors loaded."<<std::endl;
     int key = 0;
+	int wait_time = 1;
     bool rect_organization = true;
 
     while( key != 27 )
@@ -1100,10 +1114,16 @@ int main(int argc,char* argv[])
         }
 
         cv::imshow("result",src);
-        key = cv::waitKey(1);
+        key = cv::waitKey( wait_time );
 
 		if (key == 32)
 			rect_organization = !rect_organization;
+
+		if (key == 48)
+			wait_time = 0;
+
+		if (key == 49)
+			wait_time = 1;
     }
     cv::waitKey();
     return 0;
