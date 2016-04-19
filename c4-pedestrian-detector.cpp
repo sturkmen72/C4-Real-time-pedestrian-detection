@@ -621,21 +621,6 @@ DetectionScanner scanner(HUMAN_height,HUMAN_width,HUMAN_xdiv,HUMAN_ydiv,256,0.8)
 // ---------------------------------------------------------------------
 // Helper functions
 
-// for timing of the detector
-
-static timeb TimingMilliSeconds;
-
-void StartOfDuration()
-{
-    ftime(&TimingMilliSeconds);
-}
-
-int EndOfDuration()
-{
-    struct timeb now;
-    ftime(&now);
-    return int( (now.time-TimingMilliSeconds.time)*1000+(now.millitm-TimingMilliSeconds.millitm) );
-}
 
 // compute the Sobel image "ct" from "original"
 void ComputeCT(IntImage<double>& original,IntImage<int>& ct)
@@ -1060,12 +1045,10 @@ int DetectHuman(const char* filename,DetectionScanner& ds)
     IntImage<double> original;
 //    original.Load(filename);
 
-    StartOfDuration();
     ds.FastScan(original,results,2);
     PostProcess(results,2);
     PostProcess(results,0);
     RemoveCoveredRectangles(results);
-    totaltime += EndOfDuration();
 
     cvNamedWindow("show");
     {
