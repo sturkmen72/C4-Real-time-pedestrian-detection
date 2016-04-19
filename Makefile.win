@@ -1,0 +1,21 @@
+CC = cl.exe
+CFLAGS = -nologo -Ox -EHsc -I. -D _CRT_SECURE_NO_DEPRECATE -D _USE_MATH_DEFINES /fp:fast -c
+
+#IMPORTANT: Make sure that you changed these paths to the one in your computer
+OPENCV_INCLUDE = -I "c:\OpenCV2.2\include\opencv" -I "c:\OpenCV2.2\include"
+OPENCV_LIB = "c:\OpenCV2.2\lib"
+OPENCV = $(OPENCV_INCLUDE)
+
+all: PedDetect.exe
+
+Pedestrian_ICRA.obj: Pedestrian_ICRA.cpp Pedestrian.h mdarray.h IntImage.h
+	$(CC) $(CFLAGS) $(OPENCV) Pedestrian_ICRA.cpp
+
+main.obj: main.cpp
+	$(CC) $(CFLAGS) $(OPENCV) main.cpp
+	
+PedDetect.exe: Pedestrian_ICRA.obj main.obj
+	$(CC) $(OPENCV_LIB)\opencv_core220.lib $(OPENCV_LIB)\opencv_highgui220.lib $(OPENCV_LIB)\opencv_imgproc220.lib main.obj Pedestrian_ICRA.obj -o PedDetect.exe
+	
+clean:
+    -erase /Q *.obj PedDetect.exe

@@ -1,0 +1,22 @@
+CC=g++
+WLEVEL=-Wall
+CFLAGS=-c $(WLEVEL) -march=native -O3 -Ic:\OpenCV2.2\include -Ic:\OpenCV2.2\include\opencv -ffast-math
+LDFLAGS= -Lc:\OpenCV2.2\MinGW\lib
+SOURCES= Pedestrian_ICRA.cpp main.cpp
+OBJECTS=$(SOURCES:.cpp=.o)
+
+all:  detect
+
+depend:
+	g++ $(CFLAGS) -MM $(SOURCES) > .deps
+
+clean:
+	del *.o detect.exe *~ *.bak
+
+detect: $(OBJECTS)
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ -lopencv_core220 -lopencv_highgui220 -lopencv_imgproc220
+
+.cpp.o:
+	$(CC) $(CFLAGS) $*.cpp
+
+include .deps

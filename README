@@ -1,0 +1,23 @@
+This software is accompanying the paper
+
+Real-Time Human Detection Using Contour Cues [pdf]
+Jianxin Wu, Christopher Geyer, and James M. Rehg
+The 2011 IEEE International Conference on Robotics and Automation
+May 9-11, Shanghai, China, 2011.
+
+You are free to use it for Non-Commercial purposes, e.g. research and 
+academics. However, please note that this software is provided "as-is",
+without any guarantee (explicit or implied).
+
+
+This software is developped and tested under Ubuntu -- make sure you
+have GNU make and g++ installed (version >=4.4). You also need to have
+the OpenCV package installed (thus also pkg-config). Then simply run
+"make" in the software's directory and you will be able to run the
+"./detect" command.
+
+For more information, please read the paper and comments in the code.
+
+-- Jianxin Wu
+-- jxwu@ntu.edu.sg / wujx2001@gmail.com
+-- http://c2inet.sce.ntu.edu.sg/Jianxin/index.html
