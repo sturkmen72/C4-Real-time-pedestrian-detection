@@ -18,6 +18,18 @@ In: Proc. The 2011 IEEE Int'l Conference on Robotics and Automation (ICRA 2011),
 
 - Test interface improved.
 
+**usage information:**
+
+     usage:
+     TestC4Detector <video_file>
+     
+     keys:
+     space : toggle using simple post-process (NMS, non-maximal suppression)
+     0     : waits to process next frame until a key pressed
+     1     : doesn't wait to process next frame
+     2     : resize frames 1/2
+     3     : don't resize frames
+     4     : resize frames 1/4
 
 
 **Development objectives**
