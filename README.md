@@ -23,6 +23,8 @@ In: Proc. The 2011 IEEE Int'l Conference on Robotics and Automation (ICRA 2011),
      usage:
      TestC4Detector <video_file>
      
+     (note: files combined.txt.model and combined.txt.model_ must be at the same directory with executable)
+     
      keys:
      space : toggle using simple post-process (NMS, non-maximal suppression)
      0     : waits to process next frame until a key pressed
