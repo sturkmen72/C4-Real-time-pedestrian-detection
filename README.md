@@ -31,6 +31,9 @@ In: Proc. The 2011 IEEE Int'l Conference on Robotics and Automation (ICRA 2011),
      3     : don't resize frames
      4     : resize frames 1/4
 
+**Sample output**
+
+<img src = "https://raw.githubusercontent.com/sturkmen72/C4-Real-time-pedestrian-detection/master/sample_output.jpg"/>
 
 **Development objectives**
 
