@@ -1,4 +1,5 @@
 # C4-Real-time-pedestrian-detection
+<img src = "https://travis-ci.org/sturkmen72/C4-Real-time-pedestrian-detection.svg?branch=master"/>
 Real-Time Human Detection Using Contour Cues
 
 based on Jianxin Wu's work
