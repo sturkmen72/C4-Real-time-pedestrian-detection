@@ -287,17 +287,15 @@ bool IntImage<T>::Load(cv::Mat img, const char channel)
 template<class T>
 void IntImage<T>::Save(const std::string& filename) const
 {
-    IplImage* img;
-
-    img = cvCreateImage(cvSize(ncol,nrow),IPL_DEPTH_8U,1);
-    for(int i=0,ih=img->height,iw=img->width; i<ih; i++)
+    cv::Mat img(cv::Size(ncol,nrow),CV_8U);
+    for(int r=0; r<img.rows; r++)
     {
-        T* pdata = p[i];
-        unsigned char* pimg = reinterpret_cast<unsigned char*>(img->imageData+img->widthStep*i);
-        for(int j=0; j<iw; j++) pimg[j] = (unsigned char)pdata[j];
+        T* pdata = p[r];
+        unsigned char* pimg = img.ptr<unsigned char>(r);
+        for(int c=0; c<img.cols; c++)
+            pimg[c] = (unsigned char)pdata[c];
     }
-    cvSaveImage(filename.c_str(),img);
-    cvReleaseImage(&img);
+    cv::imwrite(filename.c_str(),img);
 }
 
 template<class T>
@@ -1054,15 +1052,13 @@ int DetectHuman(const char* filename,DetectionScanner& ds)
     PostProcess(results,0);
     RemoveCoveredRectangles(results);
 
-    cvNamedWindow("show");
+    cv::namedWindow("show");
     {
-        IplImage* iplImage = NULL;
-        iplImage = cvLoadImage(filename);
+        cv::Mat image = cv::imread(filename);
         for(unsigned int i=0; i<results.size(); i++)
-            cvRectangle(iplImage,cvPoint(results[i].left,results[i].top),cvPoint(results[i].right,results[i].bottom),CV_RGB(255,0,0),2);
-        cvShowImage("show",iplImage);
-        cvWaitKey();
-        cvReleaseImage(&iplImage);
+            cv::rectangle(image,cv::Point(results[i].left,results[i].top),cv::Point(results[i].right,results[i].bottom),cv::Scalar(0,0,255),2);
+        cv::imshow("show",image);
+        cv::waitKey();
     }
     return (int)results.size();
 }
@@ -1098,13 +1094,13 @@ int main(int argc,char* argv[])
     while( key != 27 )
     {
         capture >> src;
-        if( src.empty() ) break;  
-		
+        if( src.empty() ) break;
+
 		if (fx < 1)
 		{
 			cv::resize(src, src, cv::Size(), fx, fx);
 		}
-		
+
         original.Load( src );
         std::vector<CRect> results;
         scanner.FastScan(original, results, 2);
@@ -1118,7 +1114,7 @@ int main(int argc,char* argv[])
 
         for(size_t i = 0; i < results.size(); i++)
         {
-            cv::rectangle(src, cvPoint(results[i].left,results[i].top),cvPoint(results[i].right,results[i].bottom),cv::Scalar(0,255,0),2 );
+            cv::rectangle(src, cv::Point(results[i].left,results[i].top),cv::Point(results[i].right,results[i].bottom),cv::Scalar(0,255,0),2 );
         }
 
         cv::imshow("result",src);
