@@ -613,7 +613,7 @@ const int HUMAN_ydiv = 4;
 static const int EXT = 1;
 
 // The detector
-DetectionScanner scanner(HUMAN_height,HUMAN_width,HUMAN_xdiv,HUMAN_ydiv,256,0.8);
+DetectionScanner scanner(HUMAN_height,HUMAN_width,HUMAN_xdiv,HUMAN_ydiv,256,0.7);
 bool Show_Detection_Steps;
 // ---------------------------------------------------------------------
 // Helper functions
@@ -976,6 +976,18 @@ void DetectionScanner::InitIntegralImages(const int stepsize)
         double* p2 = scores.p[i+hd];
         for(int j=2; j<ct.ncol-2-width; j+=stepsize)
             p1[j] += (p2[j+wd] - p2[j] - p1[j+wd]);
+    }
+
+    if (Show_Detection_Steps)
+    {
+        cv::Mat img_scores(scores.nrow, scores.ncol, CV_64F, scores.buf), img,cimg;
+        cv::Mat img_sobel(sobel.nrow, sobel.ncol, CV_64F, sobel.buf);
+        img_sobel.convertTo(img, CV_8U, 1. / 256);
+        cv::cvtColor(img, cimg, cv::COLOR_GRAY2BGR);
+        img_scores.convertTo(img, CV_8U, 127);
+        cv::insertChannel(img, cimg, 2);
+        imshow("4-scores", cimg);
+        cv::waitKey();
     }
 }
 
