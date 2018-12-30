@@ -280,7 +280,8 @@ bool IntImage<T>::Load(cv::Mat img, const char channel)
         unsigned char* pimg = reinterpret_cast<unsigned char*>(img.data+img.step*i);
         for(int j=0; j<iw; j++) pdata[j] = pimg[j];
     }
-
+    if(Show_Detection_Steps)
+        imshow("1-Load", img);
     return true;
 }
 
@@ -601,8 +602,6 @@ public:
     }
 };
 
-void RunFiles();
-
 /*****************************************/
 // Pedestrian_ICRA.cpp
 /*****************************************/
@@ -615,7 +614,7 @@ static const int EXT = 1;
 
 // The detector
 DetectionScanner scanner(HUMAN_height,HUMAN_width,HUMAN_xdiv,HUMAN_ydiv,256,0.8);
-
+bool Show_Detection_Steps;
 // ---------------------------------------------------------------------
 // Helper functions
 
@@ -1077,11 +1076,21 @@ int main(int argc,char* argv[])
 	std::cout << "2     : resize frames 1/2" << std::endl;
 	std::cout << "3     : don't resize frames" << std::endl;
 	std::cout << "4     : resize frames 1/4" << std::endl;
+    std::cout << "s     : toggle Show_Detection_Steps" << std::endl;
+    
 	if (argc < 2)
 		return 0;
 
-	cv::Mat src;
+	cv::Mat src,img;
+    bool is_video = true;
+
     cv::VideoCapture capture( argv[1] );
+    if (capture.get(cv::CAP_PROP_FRAME_COUNT) == 1)
+    {
+        capture >> img;
+        is_video = false;
+    }
+
 
     LoadCascade(scanner);
     std::cout<<"Detectors loaded."<<std::endl;
@@ -1093,7 +1102,11 @@ int main(int argc,char* argv[])
 
     while( key != 27 )
     {
-        capture >> src;
+        if (is_video)
+            capture >> src;
+        else
+            src = img.clone();
+
         if( src.empty() ) break;
 
 		if (fx < 1)
@@ -1137,6 +1150,13 @@ int main(int argc,char* argv[])
 
 		if (key == 52)
 			fx = 0.25;
+
+        if (key == 's' | key == 'S')
+        {
+            Show_Detection_Steps = !Show_Detection_Steps;
+            cv::destroyAllWindows();
+        }
+
 	}
     cv::waitKey();
     return 0;
