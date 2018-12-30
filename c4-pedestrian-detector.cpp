@@ -986,7 +986,8 @@ void DetectionScanner::InitIntegralImages(const int stepsize)
         cv::cvtColor(img, cimg, cv::COLOR_GRAY2BGR);
         img_scores.convertTo(img, CV_8U, 127);
         cv::insertChannel(img, cimg, 2);
-        imshow("4-scores", cimg);
+        imshow("2-Sobel", cimg);
+        imshow("4-scores", img);
         cv::waitKey();
     }
 }
