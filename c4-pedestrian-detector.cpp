@@ -929,6 +929,17 @@ void DetectionScanner::InitImage(IntImage<double>& original)
     image = original;
     image.Sobel(sobel,false,false);
     ComputeCT(sobel,ct);
+
+    if (Show_Detection_Steps)
+    {
+        cv::Mat img_sobel(sobel.nrow, sobel.ncol, CV_64F, sobel.buf),img;
+        img_sobel.convertTo(img, CV_8U, 1. / 256);
+        imshow("2-Sobel", img);
+        cv::Mat img_ct(ct.nrow, ct.ncol, CV_32S, ct.buf);
+        img_ct.convertTo(img, CV_8U);
+        imshow("3-ct", img);
+    }
+
 }
 
 // combine the (xdiv-1)*(ydiv-1) integral images into a single one
