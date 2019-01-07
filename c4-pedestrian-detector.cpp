@@ -770,11 +770,11 @@ void PostProcess(std::vector<CRect>& result,const int combine_min)
     bool yet;
     CRect rectInter;
 
-    for(unsigned int i=0,size_i=result.size(); i<size_i; i++)
+    for(size_t i=0,size_i=result.size(); i<size_i; i++)
     {
         yet = false;
         CRect& result_i = result[i];
-        for(unsigned int j=0,size_r=res1.size(); j<size_r; j++)
+        for(size_t j=0,size_r=res1.size(); j<size_r; j++)
         {
             CRect& resmax_j = resmax[j];
             if(result_i.Intersect(rectInter,resmax_j))
@@ -803,7 +803,7 @@ void PostProcess(std::vector<CRect>& result,const int combine_min)
         }
     }
 
-    for(unsigned int i=0,size=res1.size(); i<size; i++)
+    for(size_t i=0,size=res1.size(); i<size; i++)
     {
         const int count = res2[i];
         CRect& res1_i = res1[i];
@@ -814,7 +814,7 @@ void PostProcess(std::vector<CRect>& result,const int combine_min)
     }
 
     result.clear();
-    for(unsigned int i=0,size=res1.size(); i<size; i++)
+    for(size_t i=0,size=res1.size(); i<size; i++)
         if(res2[i]>combine_min)
             result.push_back(res1[i]);
 }
@@ -873,7 +873,7 @@ void LoadCascade(DetectionScanner& ds)
 
 void DetectionScanner::LoadDetector(std::vector<NodeDetector::NodeType>& types,std::vector<int>& upper_bounds,std::vector<std::string>& filenames)
 {
-    unsigned int depth = types.size();
+    size_t depth = types.size();
     assert(depth>0 && depth==upper_bounds.size() && depth==filenames.size());
     if(cascade)
         delete cascade;
@@ -984,11 +984,18 @@ void DetectionScanner::InitIntegralImages(const int stepsize)
         cv::Mat img_sobel(sobel.nrow, sobel.ncol, CV_64F, sobel.buf);
         img_sobel.convertTo(img, CV_8U, 1. / 256);
         cv::cvtColor(img, cimg, cv::COLOR_GRAY2BGR);
-        img_scores.convertTo(img, CV_8U, 127);
+        img_scores.convertTo(img, CV_8U, 187);
         cv::insertChannel(img, cimg, 2);
         imshow("2-Sobel", cimg);
         imshow("4-scores", img);
-        cv::waitKey();
+
+        int key = cv::waitKey();
+
+        if (key == 's' || key == 'S')
+        {
+            Show_Detection_Steps = !Show_Detection_Steps;
+            cv::destroyAllWindows();
+        }
     }
 }
 
@@ -1057,38 +1064,6 @@ int DetectionScanner::FastScan(IntImage<double>& original,std::vector<CRect>& re
     return 0;
 }
 
-// The interface function that detects pedestrians
-// "filename" -- an input image
-// detect pedestrians in image "filename" and save results to "outname"
-// "ds" -- the detector cascade -- pass "scanner" as this parameter
-// "out" -- file stream that saves the output rectangle information
-int totaltime = 0;
-
-int DetectHuman(const char* filename,DetectionScanner& ds)
-{
-    std::vector<CRect> results;
-    IntImage<double> original;
-//    original.Load(filename);
-
-    ds.FastScan(original,results,2);
-    PostProcess(results,2);
-    PostProcess(results,0);
-    RemoveCoveredRectangles(results);
-
-    cv::namedWindow("show");
-    {
-        cv::Mat image = cv::imread(filename);
-        for(unsigned int i=0; i<results.size(); i++)
-            cv::rectangle(image,cv::Point(results[i].left,results[i].top),cv::Point(results[i].right,results[i].bottom),cv::Scalar(0,0,255),2);
-        cv::imshow("show",image);
-        cv::waitKey();
-    }
-    return (int)results.size();
-}
-
-// End of Detection functions
-// ---------------------------------------------------------------------
-
 int main(int argc,char* argv[])
 {
 	std::cout << "usage:" << std::endl;
@@ -1101,6 +1076,8 @@ int main(int argc,char* argv[])
 	std::cout << "3     : don't resize frames" << std::endl;
 	std::cout << "4     : resize frames 1/4" << std::endl;
     std::cout << "s     : toggle Show_Detection_Steps" << std::endl;
+    std::cout << "r     : increase resize ratio" << std::endl;
+    std::cout << "e     : decrease resize ratio" << std::endl;
     
 	if (argc < 2)
 		return 0;
@@ -1151,7 +1128,7 @@ int main(int argc,char* argv[])
 
         for(size_t i = 0; i < results.size(); i++)
         {
-            cv::rectangle(src, cv::Point(results[i].left,results[i].top),cv::Point(results[i].right,results[i].bottom),cv::Scalar(0,255,0),2 );
+            cv::rectangle(src, cv::Point2d(results[i].left,results[i].top),cv::Point2d(results[i].right,results[i].bottom),cv::Scalar(0,255,0),2 );
         }
 
         cv::imshow("result",src);
@@ -1175,10 +1152,25 @@ int main(int argc,char* argv[])
 		if (key == 52)
 			fx = 0.25;
 
-        if (key == 's' | key == 'S')
+        if (key == 's' || key == 'S')
         {
             Show_Detection_Steps = !Show_Detection_Steps;
             cv::destroyAllWindows();
+        }
+
+        if (key == 'r' || key == 'R')
+        {
+            if(scanner.ratio < 0.9)
+                scanner.ratio *= 1.1;
+            else scanner.ratio = 0.95;
+            std::cout << "scanner.ratio :" << scanner.ratio << std::endl;
+        }
+ 
+        if (key == 'e' || key == 'E')
+        {
+            if (scanner.ratio > 0.2)
+                scanner.ratio *= 0.9;
+            std::cout << "scanner.ratio :" << scanner.ratio << std::endl;
         }
 
 	}
