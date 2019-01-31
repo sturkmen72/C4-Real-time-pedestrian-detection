@@ -235,7 +235,7 @@ public:
 
     IntImage<T>& operator=(const IntImage<T>& source);
 
-    void Sobel(IntImage<REAL>& result,const bool useSqrt,const bool normalize);
+    void Sobel(IntImage<REAL>& result);
 public:
     using Array2dC<T>::nrow;
     using Array2dC<T>::ncol;
@@ -403,15 +403,9 @@ void IntImage<T>::Swap(IntImage<T>& image2)
 }
 
 template<class T>
-void IntImage<T>::Sobel(IntImage<REAL>& result,const bool useSqrt,const bool normalize)
+void IntImage<T>::Sobel(IntImage<REAL>& result)
 {
     // compute the Sobel gradient. For now, we just use the very inefficient way. Optimization can be done later
-// if useSqrt = true, we compute the real Sobel gradient; otherwise, the square of it
-// if normalize = true, the numbers are normalized to be in 0..255
-    result.Create(nrow,ncol);
-    for(int i=0; i<nrow; i++) result.p[i][0] = result.p[i][ncol-1] = 0;
-    std::fill(result.p[0],result.p[0]+ncol,0.0);
-    std::fill(result.p[nrow-1],result.p[nrow-1]+ncol,0.0);
     for(int i=1; i<nrow-1; i++)
     {
         T* p1 = p[i-1];
@@ -428,29 +422,6 @@ void IntImage<T>::Sobel(IntImage<REAL>& result,const bool useSqrt,const bool nor
                           +    p1[j+1] - p3[j+1];
             pr[j] = gx*gx+gy*gy;
         }
-    }
-    if(useSqrt || normalize ) // if we want to normalize the result image, we'd better use the true Sobel gradient
-        for(int i=1; i<nrow-1; i++)
-            for(int j=1; j<ncol-1; j++)
-                result.p[i][j] = sqrt(result.p[i][j]);
-
-    if(normalize)
-    {
-        REAL minv = 1e20, maxv = -minv;
-        for(int i=1; i<nrow-1; i++)
-        {
-            for(int j=1; j<ncol-1; j++)
-            {
-                if(result.p[i][j]<minv)
-                    minv = result.p[i][j];
-                else if(result.p[i][j]>maxv)
-                    maxv = result.p[i][j];
-            }
-        }
-        for(int i=0; i<nrow; i++) result.p[i][0] = result.p[i][ncol-1] = minv;
-        for(int i=0; i<ncol; i++) result.p[0][i] = result.p[nrow-1][i] = minv;
-        REAL s = 255.0/(maxv-minv);
-        for(int i=0; i<nrow*ncol; i++) result.buf[i] = (result.buf[i]-minv)*s;
     }
 }
 
@@ -927,7 +898,8 @@ void CascadeDetector::AddNode(const NodeDetector::NodeType _type,const int _feat
 void DetectionScanner::InitImage(IntImage<double>& original)
 {
     image = original;
-    image.Sobel(sobel,false,false);
+    sobel.Create(image.nrow, image.ncol);
+    image.Sobel(sobel);
     ComputeCT(sobel,ct);
 
     if (Show_Detection_Steps)
@@ -1004,7 +976,7 @@ void DetectionScanner::ResizeImage()
 {
     image.Resize(sobel,ratio);
     image.Swap(sobel);
-    image.Sobel(sobel,false,false);
+    image.Sobel(sobel);
     ComputeCT(sobel,ct);
 }
 
