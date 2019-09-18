@@ -8,16 +8,8 @@ before_script:
   - mkdir build-opencv
   - cd build-opencv
   - cmake 
-    -DBUILD_PNG=OFF 
-    -DBUILD_TIFF=OFF 
-    -DBUILD_JPEG=OFF 
-    -DBUILD_WEBP=OFF 
-    -DBUILD_OPENEXR=OFF 
-    -DBUILD_JASPER=OFF 
-    -DBUILD_ZLIB=OFF 
     -DBUILD_PERF_TESTS=OFF 
     -DBUILD_TESTS=OFF 
-    -DBUILD_OPENEXR=OFF 
     -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules 
      ../opencv
 script:
