@@ -1,0 +1,23 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+
+platform:
+  - x64
+
+install:
+  - cmd: echo "Downloading conan..."
+  - cmd: set PATH=%PATH%;%PYTHON%/Scripts/
+  - cmd: pip.exe install conan
+  - cmd: conan user # Create the conan data directory
+  - cmd: conan --version
+
+build_script:
+  - cmd: mkdir build
+  - cmd: cd build
+  - cmd: conan install ..
+  - cmd: cmake .. -G "Visual Studio 15 2017 Win64"
+  - cmd: cmake --build . --config Release
+
+test_script:
+  - cmd: cd bin
+  - cmd: c4-pedestrian-detector.exe
