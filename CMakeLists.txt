@@ -1,16 +1,17 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required (VERSION 3.9)
+project (TestC4Detector)
 
-PROJECT (TestC4Detector)
+option(BUILD_SHARED_LIBS "Build shared libs" ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
-find_package(OpenCV  REQUIRED)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
 
+#dont use find_package(OpenCV)
+#(OpenCVConfig.cmake has some problems with conan package)
+set(OpenCV_LIBS CONAN_PKG::opencv)
 
-file(GLOB TestC4Detector_SRCS
-    "*.h"
-    "*.cpp")
-ADD_EXECUTABLE (TestC4Detector ${TestC4Detector_SRCS})
-
-
+ADD_EXECUTABLE (TestC4Detector c4-pedestrian-detector.cpp)
 
 if (OpenCV_FOUND)
 	include_directories( ${OpenCV_INCLUDE_DIRS} )
