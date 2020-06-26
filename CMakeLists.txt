@@ -13,6 +13,8 @@ set(OpenCV_LIBS CONAN_PKG::opencv)
 
 ADD_EXECUTABLE (TestC4Detector c4-pedestrian-detector.cpp)
 
+find_package(OpenCV REQUIRED)
+
 if (OpenCV_FOUND)
 	include_directories( ${OpenCV_INCLUDE_DIRS} )
 #	include_directories("${OPENCV_CONFIG_PATH}/include")
