@@ -5,19 +5,24 @@ platform:
   - x64
 
 install:
-  - cmd: echo "Downloading conan..."
-  - cmd: set PATH=%PATH%;%PYTHON%/Scripts/
-  - cmd: pip.exe install conan
-  - cmd: conan user # Create the conan data directory
-  - cmd: conan --version
-
+  - cmd: echo "compile OpenCV"
+  - cmd: git clone --depth=1 --branch=3.4 https://github.com/opencv/opencv.git
+  - cmd: md build-opencv
+  - cmd: cd build-opencv
+  - cmd: cmake -DWITH_JASPER=OFF -DWITH_WEBP=OFF -DBUILD_IPP_IW=OFF -DBUILD_ITT=OFF -DBUILD_JPEG=OFF -DBUILD_OPENEXR=OFF -DBUILD_OPENJPEG=OFF -DBUILD_PNG=OFF -DBUILD_PROTOBUF=OFF -DBUILD_TIFF=OFF -DBUILD_WEBP=OFF -DBUILD_ZLIB=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_TESTS=OFF -DBUILD_JAVA=OFF -DBUILD_opencv_gapi=OFF -DBUILD_opencv_ml=OFF -DBUILD_opencv_objdetect=OFF -DBUILD_opencv_photo=OFF -DBUILD_opencv_stitching=OFF -DBUILD_opencv_calib3d=OFF -DBUILD_opencv_features2d=OFF -DBUILD_opencv_flann=OFF -DBUILD_opencv_video=OFF ../opencv -G "Visual Studio 15 2017 Win64"
+  - cmd: cmake --build . --config Release
+  - cmd: cd..
+  - cmd: set OpenCV_DIR=C:\projects\c4-real-time-pedestrian-detection\build-opencv
 build_script:
-  - cmd: mkdir build
   - cmd: cd build
-  - cmd: conan install ..
   - cmd: cmake .. -G "Visual Studio 15 2017 Win64"
   - cmd: cmake --build . --config Release
 
 test_script:
-  - cmd: cd bin
-  - cmd: c4-pedestrian-detector.exe
+  - cmd: set PATH=C:\projects\c4-real-time-pedestrian-detection\build-opencv\bin\Release
+  - cmd: cd Release
+  - cmd: TestC4Detector C:\projects\c4-real-time-pedestrian-detection\opencv\samples\data\vtest.avi
+
+artifacts:
+  - path: .\build\Release\result.jpg
+    name: result

@@ -1089,7 +1089,9 @@ int main(int argc,char* argv[])
 
         original.Load( src );
         std::vector<CRect> results;
-        scanner.FastScan(original, results, 2);
+        cv::TickMeter tm;
+	tm.start();
+	scanner.FastScan(original, results, 2);
 
         if(rect_organization)
         {
@@ -1097,12 +1099,15 @@ int main(int argc,char* argv[])
             PostProcess(results,0);
             RemoveCoveredRectangles(results);
         }
+        tm.stop();
+        std::cout << "\ndetection time :" << tm.getTimeMilli() << " ms.";
 
-        for(size_t i = 0; i < results.size(); i++)
+	for(size_t i = 0; i < results.size(); i++)
         {
             cv::rectangle(src, cv::Point2d(results[i].left,results[i].top),cv::Point2d(results[i].right,results[i].bottom),cv::Scalar(0,255,0),2 );
         }
 
+	cv::imwrite("result.jpg",src);
         cv::imshow("result",src);
         key = cv::waitKey( wait_time );
 
@@ -1146,6 +1151,5 @@ int main(int argc,char* argv[])
         }
 
 	}
-    cv::waitKey();
     return 0;
 }
