@@ -1,4 +1,4 @@
-# C4-Real-time-pedestrian-detection[![Travis Status](https://travis-ci.org/sturkmen72/C4-Real-time-pedestrian-detection.svg?branch=master)](https://travis-ci.org/sturkmen72/C4-Real-time-pedestrian-detection)
+# C4-Real-time-pedestrian-detection
 
 Real-Time Human Detection Using Contour Cues
 

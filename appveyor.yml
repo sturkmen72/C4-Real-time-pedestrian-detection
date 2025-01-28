@@ -1,28 +1,43 @@
 version: 1.0.{build}
-image: Visual Studio 2017
+image: Visual Studio 2022
 
 platform:
   - x64
 
 install:
-  - cmd: echo "compile OpenCV"
-  - cmd: git clone --depth=1 --branch=3.4 https://github.com/opencv/opencv.git
-  - cmd: md build-opencv
-  - cmd: cd build-opencv
-  - cmd: cmake -DWITH_JASPER=OFF -DWITH_WEBP=OFF -DBUILD_IPP_IW=OFF -DBUILD_ITT=OFF -DBUILD_JPEG=OFF -DBUILD_OPENEXR=OFF -DBUILD_OPENJPEG=OFF -DBUILD_PNG=OFF -DBUILD_PROTOBUF=OFF -DBUILD_TIFF=OFF -DBUILD_WEBP=OFF -DBUILD_ZLIB=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_TESTS=OFF -DBUILD_JAVA=OFF -DBUILD_opencv_gapi=OFF -DBUILD_opencv_ml=OFF -DBUILD_opencv_objdetect=OFF -DBUILD_opencv_photo=OFF -DBUILD_opencv_stitching=OFF -DBUILD_opencv_calib3d=OFF -DBUILD_opencv_features2d=OFF -DBUILD_opencv_flann=OFF -DBUILD_opencv_video=OFF ../opencv -G "Visual Studio 15 2017 Win64"
-  - cmd: cmake --build . --config Release
-  - cmd: cd..
-  - cmd: set OpenCV_DIR=C:\projects\c4-real-time-pedestrian-detection\build-opencv
+  - cmd: call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - cmd: appveyor DownloadFile "https://github.com/joedrago/nasm_mirror/raw/master/nasm-2.15.05-win64.zip" -FileName "nasm.zip"
+  - cmd: 7z x "nasm.zip" > nul
+  - cmd: move nasm-* NASM
+  - cmd: set PATH=%PATH%;%CD%\NASM;
+  - cmd: nasm -v
+  - cmd: git clone --depth=1 --branch=misc-test https://github.com/sturkmen72/opencv.git
+  - cmd: git clone -b v1.1.1 https://github.com/AOMediaCodec/libavif.git
+  - cmd: cmake -S libavif -B libavif/build -DBUILD_SHARED_LIBS=ON -DAVIF_CODEC_AOM=LOCAL -DAVIF_LIBYUV=LOCAL -DAVIF_LIBSHARPYUV=LOCAL -DAVIF_JPEG=OFF -DAVIF_ZLIBPNG=OFF -DAVIF_BUILD_APPS=OFF
+  - cmd: cmake --build libavif/build --config Release --target install
+  - cmd: set PATH=%PATH%;C:\projects\c4-real-time-pedestrian-detection\opencv\build\bin\Release;C:\Program Files (x86)\libavif;C:\Program Files (x86)\libavif\bin
+  - cmd: cmake -S opencv -B opencv/build -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DWITH_ZLIB_NG=ON -DWITH_IMGCODEC_GIF=ON -DWITH_SPNG=OFF -DWITH_JPEG=ON -DWITH_TIFF=OFF -DWITH_JASPER=OFF -DWITH_OPENEXR=OFF -DWITH_IPP=OFF -DWITH_ADE=OFF -DWITH_ITT=OFF -DBUILD_OPENJPEG=OFF -DBUILD_PROTOBUF=OFF -DBUILD_JAVA=OFF -DBUILD_opencv_apps=OFF -DBUILD_opencv_dnn=OFF -DBUILD_opencv_gapi=OFF -DBUILD_opencv_features2d=OFF -DBUILD_opencv_flann=OFF -DBUILD_opencv_video=OFF -DBUILD_opencv_ml=OFF -DBUILD_opencv_objdetect=OFF -DBUILD_opencv_photo=OFF -DBUILD_opencv_calib3d=OFF -DBUILD_opencv_stitching=OFF
+  - cmd: cmake --build opencv/build --config Release
+  - cmd: set OpenCV_DIR=C:\projects\c4-real-time-pedestrian-detection\opencv\build
 build_script:
   - cmd: cd build
-  - cmd: cmake .. -G "Visual Studio 15 2017 Win64"
+  - cmd: cmake ..
   - cmd: cmake --build . --config Release
 
 test_script:
-  - cmd: set PATH=C:\projects\c4-real-time-pedestrian-detection\build-opencv\bin\Release
   - cmd: cd Release
   - cmd: TestC4Detector C:\projects\c4-real-time-pedestrian-detection\opencv\samples\data\vtest.avi
 
 artifacts:
   - path: .\build\Release\result.jpg
-    name: result
+    name: result.jpg
+  - path: .\build\Release\result.png
+    name: result.png
+  - path: .\build\Release\result_IMWRITE_PNG_COMPRESSION_6.png
+    name: result_IMWRITE_PNG_COMPRESSION_6.png
+  - path: .\build\Release\result.avif
+    name: result.avif
+  - path: .\build\Release\result.webp
+    name: result.webp
+  - path: .\build\Release\result.gif
+    name: result.gif

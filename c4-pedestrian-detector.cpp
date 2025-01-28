@@ -1036,28 +1036,30 @@ int DetectionScanner::FastScan(IntImage<double>& original,std::vector<CRect>& re
     return 0;
 }
 
-int main(int argc,char* argv[])
+int main(int argc, char* argv[])
 {
-	std::cout << "usage:" << std::endl;
-	std::cout << argv[0] << " <video_file>" << std::endl << std::endl;
-	std::cout << "keys:" << std::endl;
-	std::cout << "space : toggle using simple post-process (NMS, non-maximal suppression)" << std::endl;
-	std::cout << "0     : waits to process next frame until a key pressed" << std::endl;
-	std::cout << "1     : doesn't wait to process next frame" << std::endl;
-	std::cout << "2     : resize frames 1/2" << std::endl;
-	std::cout << "3     : don't resize frames" << std::endl;
-	std::cout << "4     : resize frames 1/4" << std::endl;
+    std::cout << "usage:" << std::endl;
+    std::cout << argv[0] << " <video_file>" << std::endl << std::endl;
+    std::cout << "keys:" << std::endl;
+    std::cout << "space : toggle using simple post-process (NMS, non-maximal suppression)" << std::endl;
+    std::cout << "0     : waits to process next frame until a key pressed" << std::endl;
+    std::cout << "1     : doesn't wait to process next frame" << std::endl;
+    std::cout << "2     : resize frames 1/2" << std::endl;
+    std::cout << "3     : don't resize frames" << std::endl;
+    std::cout << "4     : resize frames 1/4" << std::endl;
     std::cout << "s     : toggle Show_Detection_Steps" << std::endl;
     std::cout << "r     : increase resize ratio" << std::endl;
     std::cout << "e     : decrease resize ratio" << std::endl;
-    
-	if (argc < 2)
-		return 0;
 
-	cv::Mat src,img;
+    if (argc < 2)
+        return 0;
+
+    cv::TickMeter tm;
+    cv::Animation animation;
+    cv::Mat src, img;
     bool is_video = true;
 
-    cv::VideoCapture capture( argv[1] );
+    cv::VideoCapture capture(argv[1]);
     if (capture.get(cv::CAP_PROP_FRAME_COUNT) == 1)
     {
         capture >> img;
@@ -1066,68 +1068,72 @@ int main(int argc,char* argv[])
 
 
     LoadCascade(scanner);
-    std::cout<<"Detectors loaded."<<std::endl;
+    std::cout << "Detectors loaded." << std::endl;
     int key = 0;
-	int wait_time = 1;
-	float fx = 1;
+    int wait_time = 1;
+    float fx = 1;
     bool rect_organization = true;
-	IntImage<double> original;
+    IntImage<double> original;
 
-    while( key != 27 )
+    while (key != 27)
     {
         if (is_video)
             capture >> src;
         else
             src = img.clone();
 
-        if( src.empty() ) break;
+        if (src.empty()) break;
 
-		if (fx < 1)
-		{
-			cv::resize(src, src, cv::Size(), fx, fx);
-		}
-
-        original.Load( src );
-        std::vector<CRect> results;
-        cv::TickMeter tm;
-	tm.start();
-	scanner.FastScan(original, results, 2);
-
-        if(rect_organization)
+        if (fx < 1)
         {
-            PostProcess(results,2);
-            PostProcess(results,0);
+            cv::resize(src, src, cv::Size(), fx, fx);
+        }
+
+        original.Load(src);
+        std::vector<CRect> results;
+        tm.reset();
+        tm.start();
+        scanner.FastScan(original, results, 2);
+
+        if (rect_organization)
+        {
+            PostProcess(results, 2);
+            PostProcess(results, 0);
             RemoveCoveredRectangles(results);
         }
         tm.stop();
         std::cout << "\ndetection time :" << tm.getTimeMilli() << " ms.";
 
-	for(size_t i = 0; i < results.size(); i++)
+        for (size_t i = 0; i < results.size(); i++)
         {
-            cv::rectangle(src, cv::Point2d(results[i].left,results[i].top),cv::Point2d(results[i].right,results[i].bottom),cv::Scalar(0,255,0),2 );
+            cv::rectangle(src, cv::Point2d(results[i].left, results[i].top), cv::Point2d(results[i].right, results[i].bottom), cv::Scalar(0, 255, 0), 2);
         }
 
-	cv::imwrite("result.jpg",src);
-        cv::imshow("result",src);
-        key = cv::waitKey( wait_time );
+        cv::imwrite("result.jpg", src);
+        cv::imshow("result", src);
+        cv::Mat resized;
+        cv::resize(src, resized, cv::Size(), 0.5, 0.5);
+        animation.frames.push_back(resized);
+        animation.durations.push_back(cvRound(tm.getTimeMilli()/2));
+        key = cv::waitKey(wait_time);
 
-		if (key == 32)
-			rect_organization = !rect_organization;
+        if (key == 32)
+            rect_organization = !rect_organization;
 
-		if (key == 48)
-			wait_time = 0;
+        if (key == 48)
+            wait_time = 0;
 
-		if (key == 49)
-			wait_time = 1;
+        if (key == 49)
+            wait_time = 1;
 
-		if (key == 50)
-			fx = 0.5;
+        if (key == 50)
+            fx = 0.5;
 
-		if (key == 51)
-			fx = 1;
+        if (key == 51)
+            fx = 1;
 
-		if (key == 52)
-			fx = 0.25;
+        if (key == 52)
+            fx = 0.25;
 
         if (key == 's' || key == 'S')
         {
@@ -1137,12 +1143,12 @@ int main(int argc,char* argv[])
 
         if (key == 'r' || key == 'R')
         {
-            if(scanner.ratio < 0.9)
+            if (scanner.ratio < 0.9)
                 scanner.ratio *= 1.1;
             else scanner.ratio = 0.95;
             std::cout << "scanner.ratio :" << scanner.ratio << std::endl;
         }
- 
+
         if (key == 'e' || key == 'E')
         {
             if (scanner.ratio > 0.2)
@@ -1150,6 +1156,31 @@ int main(int argc,char* argv[])
             std::cout << "scanner.ratio :" << scanner.ratio << std::endl;
         }
 
-	}
+    }
+    tm.reset();
+    tm.start();
+    cv::imwriteanimation("result.png", animation);
+    tm.stop();
+    std::cout << "\nsave time :" << tm.getTimeMilli() << " ms.";
+    tm.reset();
+    tm.start();
+    cv::imwriteanimation("result_IMWRITE_PNG_COMPRESSION_6.png", animation,{cv::IMWRITE_PNG_COMPRESSION,6});
+    tm.stop();
+    std::cout << "\nsave time :" << tm.getTimeMilli() << " ms.";
+    tm.reset();
+    tm.start();
+    cv::imwriteanimation("result.webp", animation);
+    tm.stop();
+    std::cout << "\nsave time :" << tm.getTimeMilli() << " ms.";
+    tm.reset();
+    tm.start();
+    cv::imwriteanimation("result.avif", animation);
+    tm.stop();
+    std::cout << "\nsave time :" << tm.getTimeMilli() << " ms.";
+    tm.reset();
+    tm.start();
+    cv::imwriteanimation("result.gif", animation);
+    tm.stop();
+    std::cout << "\nsave time :" << tm.getTimeMilli() << " ms.";
     return 0;
 }
